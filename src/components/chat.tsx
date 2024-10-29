@@ -15,6 +15,7 @@ export const maxDuration = 30;
 export default function Chat() {
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [input, setInput] = useState<string>('');  
+  const [selectedModel, setSelectedModel] = useState<string>('groq'); // Add state for selected model
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,7 +25,7 @@ export default function Chat() {
     ];
     setMessages(newMessages);
     setInput('');
-    const result = await continueTextConversation(newMessages);
+    const result = await continueTextConversation(newMessages, selectedModel); // Pass selected model
     for await (const content of readStreamableValue(result)) {
       setMessages([
         ...newMessages,
@@ -57,6 +58,16 @@ export default function Chat() {
           <Card className="p-2">
             <form onSubmit={handleSubmit}>
               <div className="flex">
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="mr-2 p-2 border rounded"
+                >
+                  <option value="groq">Groq</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="googleCloudAI">Google Cloud AI</option>
+                  <option value="azureAI">Azure AI</option>
+                </select>
                 <Input
                   type="text"
                   value={input}

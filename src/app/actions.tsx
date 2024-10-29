@@ -35,7 +35,7 @@ export interface Message {
 }
 
 // Streaming Chat 
-export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq') {
+export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
   const modelProvider = {
     groq,
     openai,
@@ -44,7 +44,7 @@ export async function continueTextConversation(messages: CoreMessage[], provider
   }[provider];
 
   const result = await streamText({
-    model: modelProvider('llama3-8b-8192'), // Use selected model
+    model: modelProvider(model), // Use selected model
     messages,
   });
 
@@ -53,7 +53,7 @@ export async function continueTextConversation(messages: CoreMessage[], provider
 }
 
 // Gen UIs 
-export async function continueConversation(history: Message[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq') {
+export async function continueConversation(history: Message[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
   const stream = createStreamableUI();
 
   const modelProvider = {
@@ -64,7 +64,7 @@ export async function continueConversation(history: Message[], provider: 'groq' 
   }[provider];
 
   const { text, toolResults } = await generateText({
-    model: modelProvider('llama3-8b-8192'), // Use selected model
+    model: modelProvider(model), // Use selected model
     system: 'You are a friendly weather assistant!',
     messages: history,
     tools: {},
