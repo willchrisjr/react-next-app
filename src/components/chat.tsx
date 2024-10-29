@@ -17,6 +17,7 @@ export default function Chat() {
   const [input, setInput] = useState<string>('');  
   const [selectedProvider, setSelectedProvider] = useState<string>('groq'); // Add state for selected provider
   const [selectedModel, setSelectedModel] = useState<string>('llama3-8b-8192'); // Add state for selected model
+  const [compareMode, setCompareMode] = useState<boolean>(false); // Add state for comparison mode
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +27,7 @@ export default function Chat() {
     ];
     setMessages(newMessages);
     setInput('');
-    const result = await continueTextConversation(newMessages, selectedProvider, selectedModel); // Pass both provider and model
+    const result = await continueTextConversation(newMessages, compareMode ? 'compare' : selectedProvider, selectedModel); // Pass both provider and model, handle comparison mode
     for await (const content of readStreamableValue(result)) {
       setMessages([
         ...newMessages,
@@ -63,6 +64,7 @@ export default function Chat() {
                   value={selectedProvider}
                   onChange={(e) => setSelectedProvider(e.target.value)}
                   className="mr-2 p-2 border rounded"
+                  disabled={compareMode} // Disable provider selection in comparison mode
                 >
                   <option value="groq">Groq</option>
                   <option value="openai">OpenAI</option>
@@ -73,6 +75,7 @@ export default function Chat() {
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="mr-2 p-2 border rounded"
+                  disabled={compareMode} // Disable model selection in comparison mode
                 >
                   <option value="llama3-8b-8192">Llama 3 8B 8192</option>
                   <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
@@ -98,6 +101,14 @@ export default function Chat() {
                 </div>
               )}
             </form>
+            <div className="flex justify-end mt-2">
+              <Button
+                variant={compareMode ? 'default' : 'outline'}
+                onClick={() => setCompareMode(!compareMode)}
+              >
+                {compareMode ? 'Disable Comparison Mode' : 'Enable Comparison Mode'}
+              </Button>
+            </div>
           </Card>
         </div>
       </div>

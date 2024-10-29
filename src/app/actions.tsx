@@ -36,7 +36,7 @@ export interface Message {
 }
 
 // Function to get model provider
-function getModelProvider(provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI') {
+function getModelProvider(provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' | 'compare') {
   const modelProviders = {
     groq,
     openai,
@@ -46,8 +46,30 @@ function getModelProvider(provider: 'groq' | 'openai' | 'googleCloudAI' | 'azure
   return modelProviders[provider];
 }
 
+// Function to compare responses from different AI models
+export async function compareAIModels(messages: CoreMessage[], models: string[]) {
+  const results = await Promise.all(models.map(async (model) => {
+    const result = await streamText({
+      model: openai(model), // Assuming openai for comparison, adjust as needed
+      messages,
+    });
+    return {
+      model,
+      response: result.textStream,
+    };
+  }));
+
+  return results;
+}
+
 // Streaming Chat 
-export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
+export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' | 'compare' = 'groq', model: string = 'llama3-8b-8192') {
+  if (provider === 'compare') {
+    const models = ['llama3-8b-8192', 'gpt-3.5-turbo', 'palm-2', 'davinci']; // Example models to compare
+    const results = await compareAIModels(messages, models);
+    return results;
+  }
+
   const modelProvider = getModelProvider(provider);
 
   const result = await streamText({
@@ -60,7 +82,21 @@ export async function continueTextConversation(messages: CoreMessage[], provider
 }
 
 // Gen UIs 
-export async function continueConversation(history: Message[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
+export async function continueConversation(history: Message[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' | 'compare' = 'groq', model: string = 'llama3-8b-8192') {
+  if (provider === 'compare') {
+    const models = ['llama3-8b-8192', 'gpt-3.5-turbo', 'palm-2', 'davinci']; // Example models to compare
+    const results = await compareAIModels(history, models);
+    return {
+      messages: [
+        ...history,
+        ...results.map(result => ({
+          role: 'assistant' as const,
+          content: result.response,
+        })),
+      ],
+    };
+  }
+
   const stream = createStreamableUI();
 
   const modelProvider = getModelProvider(provider);
