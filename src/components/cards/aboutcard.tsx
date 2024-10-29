@@ -17,9 +17,6 @@ export default function AboutCard() {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground/90 leading-normal prose"> 
           <p className="mb-3">Start a conversation by entering a message below:</p>
-          
-          
-          
         </CardContent>
       </Card>
     </div>

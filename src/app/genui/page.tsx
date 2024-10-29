@@ -1,4 +1,3 @@
-// import Chat from "@/components/chat";
 'use client';
 
 import { useState } from 'react';
@@ -13,12 +12,16 @@ export const maxDuration = 30;
 export default function GenUI() {
   const [conversation, setConversation] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
+  const [selectedProvider, setSelectedProvider] = useState<string>('groq'); // Add state for selected provider
+  const [selectedModel, setSelectedModel] = useState<string>('llama3-8b-8192'); // Add state for selected model
+  const [compareMode, setCompareMode] = useState<boolean>(false); // Add state for comparison mode
+
   const handleSubmit = async () => {
     const { messages } = await continueConversation([
       // exclude React components from being sent back to the server:
       ...conversation.map(({ role, content }) => ({ role, content })),
       { role: 'user', content: input },
-    ]);
+    ], compareMode ? 'compare' : selectedProvider, selectedModel); // Pass both provider and model, handle comparison mode
     setInput("")
     setConversation(messages);
   } 
@@ -51,6 +54,28 @@ export default function GenUI() {
         <div className="w-full max-w-xl mx-auto">
           <Card className="p-2">
             <div className="flex">
+              <select
+                value={selectedProvider}
+                onChange={(e) => setSelectedProvider(e.target.value)}
+                className="mr-2 p-2 border rounded"
+                disabled={compareMode} // Disable provider selection in comparison mode
+              >
+                <option value="groq">Groq</option>
+                <option value="openai">OpenAI</option>
+                <option value="googleCloudAI">Google Cloud AI</option>
+                <option value="azureAI">Azure AI</option>
+              </select>
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="mr-2 p-2 border rounded"
+                disabled={compareMode} // Disable model selection in comparison mode
+              >
+                <option value="llama3-8b-8192">Llama 3 8B 8192</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                <option value="palm-2">PaLM 2</option>
+                <option value="davinci">Davinci</option>
+              </select>
               <Input
                 type="text"
                 value={input}
@@ -67,6 +92,14 @@ export default function GenUI() {
               >
                 <IconArrowUp />
               </Button> 
+            </div>
+            <div className="flex justify-end mt-2">
+              <Button
+                variant={compareMode ? 'default' : 'outline'}
+                onClick={() => setCompareMode(!compareMode)}
+              >
+                {compareMode ? 'Disable Comparison Mode' : 'Enable Comparison Mode'}
+              </Button>
             </div>
           </Card>
         </div>
