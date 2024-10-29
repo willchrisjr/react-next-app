@@ -13,6 +13,21 @@ const groq = createOpenAI({
   apiKey: process.env.GROQ_API_KEY,
 });
 
+// Add OpenAI provider
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Add Google Cloud AI provider
+const googleCloudAI = createOpenAI({
+  apiKey: process.env.GOOGLE_CLOUD_AI_API_KEY,
+});
+
+// Add Azure AI provider
+const azureAI = createOpenAI({
+  apiKey: process.env.AZURE_AI_API_KEY,
+});
+
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -20,9 +35,16 @@ export interface Message {
 }
 
 // Streaming Chat 
-export async function continueTextConversation(messages: CoreMessage[]) {
+export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq') {
+  const modelProvider = {
+    groq,
+    openai,
+    googleCloudAI,
+    azureAI,
+  }[provider];
+
   const result = await streamText({
-    model: groq('llama3-8b-8192'), // Use Groq model
+    model: modelProvider('llama3-8b-8192'), // Use selected model
     messages,
   });
 
@@ -31,11 +53,18 @@ export async function continueTextConversation(messages: CoreMessage[]) {
 }
 
 // Gen UIs 
-export async function continueConversation(history: Message[]) {
+export async function continueConversation(history: Message[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq') {
   const stream = createStreamableUI();
 
+  const modelProvider = {
+    groq,
+    openai,
+    googleCloudAI,
+    azureAI,
+  }[provider];
+
   const { text, toolResults } = await generateText({
-    model: groq('llama3-8b-8192'), // Use Groq model
+    model: modelProvider('llama3-8b-8192'), // Use selected model
     system: 'You are a friendly weather assistant!',
     messages: history,
     tools: {},
