@@ -38,20 +38,7 @@ export async function continueConversation(history: Message[]) {
     model: groq('llama3-8b-8192'), // Use Groq model
     system: 'You are a friendly weather assistant!',
     messages: history,
-    tools: {
-      // showWeather: {
-      //   description: 'Show the weather for a given location.',
-      //   parameters: z.object({
-      //     city: z.string().describe('The city to show the weather for.'),
-      //     unit: z
-      //       .enum(['F'])
-      //       .describe('The unit to display the temperature in'),
-      //   }),
-      //   execute: async ({ city, unit }) => {
-      //     return `Here's the weather for ${city}!`; 
-      //   },
-      // },
-    },
+    tools: {},
   });
 
   return {

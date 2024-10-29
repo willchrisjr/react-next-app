@@ -1,4 +1,3 @@
-// import Chat from "@/components/chat";
 'use client';
 
 import { useState } from 'react';

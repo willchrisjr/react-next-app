@@ -16,9 +16,7 @@ export default function GenUICard() {
           <CardDescription>Start Chatting</CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground/90 leading-normal prose"> 
-          <p className="mb-3">A simple prompt based way to enter into conversation./</p>
-          
-         
+          <p className="mb-3">A simple prompt based way to enter into conversation.</p>
         </CardContent>
       </Card>
     </div>

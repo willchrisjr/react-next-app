@@ -12,7 +12,6 @@ export async function Header() {
       <Link href="/" rel="nofollow" className="mr-2 font-bold">
         Chat Interface
       </Link>
-      
     </header>
   )
 }
