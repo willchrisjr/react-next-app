@@ -6,6 +6,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createStreamableUI } from 'ai/rsc';
 import { ReactNode } from 'react';
 import { z } from 'zod';
+import { Configuration, OpenAIApi } from "openai"; // Import OpenAI API
 
 // Add Groq provider
 const groq = createOpenAI({
@@ -87,4 +88,31 @@ export async function continueConversation(history: Message[], provider: 'groq' 
 export async function checkAIAvailability() {
   const envVarExists = !!process.env.GROQ_API_KEY;
   return envVarExists;
+}
+
+// Function to get chat completion using OpenAI API
+export async function getChatCompletion() {
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const openai = new OpenAIApi(configuration);
+
+  try {
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: "Tell me a joke." },
+      ],
+    });
+
+    console.log(response.data.choices[0].message?.content);
+  } catch (error) {
+    if (error.response) {
+      console.error(error.response.status, error.response.data);
+    } else {
+      console.error(`Error: ${error.message}`);
+    }
+  }
 }
