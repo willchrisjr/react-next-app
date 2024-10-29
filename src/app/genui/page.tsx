@@ -12,14 +12,15 @@ export const maxDuration = 30;
 export default function GenUI() {
   const [conversation, setConversation] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState<string>('groq'); // Add state for selected model
+  const [selectedProvider, setSelectedProvider] = useState<string>('groq'); // Add state for selected provider
+  const [selectedModel, setSelectedModel] = useState<string>('llama3-8b-8192'); // Add state for selected model
 
   const handleSubmit = async () => {
     const { messages } = await continueConversation([
       // exclude React components from being sent back to the server:
       ...conversation.map(({ role, content }) => ({ role, content })),
       { role: 'user', content: input },
-    ], selectedModel); // Pass selected model
+    ], selectedProvider, selectedModel); // Pass both provider and model
     setInput("")
     setConversation(messages);
   } 
@@ -53,14 +54,24 @@ export default function GenUI() {
           <Card className="p-2">
             <div className="flex">
               <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
+                value={selectedProvider}
+                onChange={(e) => setSelectedProvider(e.target.value)}
                 className="mr-2 p-2 border rounded"
               >
                 <option value="groq">Groq</option>
                 <option value="openai">OpenAI</option>
                 <option value="googleCloudAI">Google Cloud AI</option>
                 <option value="azureAI">Azure AI</option>
+              </select>
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="mr-2 p-2 border rounded"
+              >
+                <option value="llama3-8b-8192">Llama 3 8B 8192</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                <option value="palm-2">PaLM 2</option>
+                <option value="davinci">Davinci</option>
               </select>
               <Input
                 type="text"

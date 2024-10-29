@@ -34,14 +34,20 @@ export interface Message {
   display?: ReactNode;
 }
 
-// Streaming Chat 
-export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
-  const modelProvider = {
+// Function to get model provider
+function getModelProvider(provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI') {
+  const modelProviders = {
     groq,
     openai,
     googleCloudAI,
     azureAI,
-  }[provider];
+  };
+  return modelProviders[provider];
+}
+
+// Streaming Chat 
+export async function continueTextConversation(messages: CoreMessage[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
+  const modelProvider = getModelProvider(provider);
 
   const result = await streamText({
     model: modelProvider(model), // Use selected model
@@ -56,12 +62,7 @@ export async function continueTextConversation(messages: CoreMessage[], provider
 export async function continueConversation(history: Message[], provider: 'groq' | 'openai' | 'googleCloudAI' | 'azureAI' = 'groq', model: string = 'llama3-8b-8192') {
   const stream = createStreamableUI();
 
-  const modelProvider = {
-    groq,
-    openai,
-    googleCloudAI,
-    azureAI,
-  }[provider];
+  const modelProvider = getModelProvider(provider);
 
   const { text, toolResults } = await generateText({
     model: modelProvider(model), // Use selected model
