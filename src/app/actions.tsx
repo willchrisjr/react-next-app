@@ -7,6 +7,19 @@ import { createStreamableUI } from 'ai/rsc';
 import { ReactNode } from 'react';
 import { z } from 'zod';
 import { Configuration, OpenAIApi } from "openai"; // Import OpenAI API
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
+// Retrieve API key and endpoint from environment variables
+const apiKey = process.env.AZURE_OPENAI_API_KEY;
+const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+
+if (!apiKey || !endpoint) {
+  throw new Error('API key or endpoint is not defined in the environment variables');
+}
 
 // Add Groq provider
 const groq = createOpenAI({
@@ -128,27 +141,25 @@ export async function checkAIAvailability() {
 
 // Function to get chat completion using OpenAI API
 export async function getChatCompletion() {
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
-  const openai = new OpenAIApi(configuration);
-
   try {
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "You are a helpful assistant." },
-        { role: "user", content: "Tell me a joke." },
-      ],
-    });
+    const response = await axios.post(
+      endpoint,
+      {
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: 'Tell me a joke.' },
+        ],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': apiKey,
+        },
+      }
+    );
 
-    console.log(response.data.choices[0].message?.content);
+    console.log(response.data.choices[0].message.content);
   } catch (error) {
-    if (error.response) {
-      console.error(error.response.status, error.response.data);
-    } else {
-      console.error(`Error: ${error.message}`);
-    }
+    console.error('Error:', error.response ? error.response.data : error.message);
   }
 }
