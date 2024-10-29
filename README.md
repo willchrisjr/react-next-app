@@ -16,6 +16,8 @@
 3. Set up your environment variables:
    - Add your `GROQ_API_KEY` to the `.env` file
    - Add your `OPENAI_API_KEY` to the `.env` file
+   - Add your `AZURE_OPENAI_API_KEY` to the `.env` file
+   - Add your `AZURE_OPENAI_ENDPOINT` to the `.env` file
 
 4. Run the development server:
    ```bash

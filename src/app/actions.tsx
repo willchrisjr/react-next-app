@@ -38,9 +38,32 @@ const googleCloudAI = createOpenAI({
 });
 
 // Add Azure AI provider
-const azureAI = createOpenAI({
-  apiKey: process.env.AZURE_AI_API_KEY,
-});
+const azureAI = {
+  async getChatCompletion(messages: CoreMessage[]) {
+    try {
+      const response = await axios.post(
+        endpoint,
+        {
+          messages: [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            ...messages,
+          ],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': apiKey,
+          },
+        }
+      );
+
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      throw error;
+    }
+  }
+};
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -85,6 +108,11 @@ export async function continueTextConversation(messages: CoreMessage[], provider
 
   const modelProvider = getModelProvider(provider);
 
+  if (provider === 'azureAI') {
+    const response = await azureAI.getChatCompletion(messages);
+    return createStreamableValue(response).value;
+  }
+
   const result = await streamText({
     model: modelProvider(model), // Use selected model
     messages,
@@ -114,6 +142,19 @@ export async function continueConversation(history: Message[], provider: 'groq' 
 
   const modelProvider = getModelProvider(provider);
 
+  if (provider === 'azureAI') {
+    const response = await azureAI.getChatCompletion(history);
+    return {
+      messages: [
+        ...history,
+        {
+          role: 'assistant' as const,
+          content: response,
+        },
+      ],
+    };
+  }
+
   const { text, toolResults } = await generateText({
     model: modelProvider(model), // Use selected model
     system: 'You are a friendly weather assistant!',
@@ -135,7 +176,7 @@ export async function continueConversation(history: Message[], provider: 'groq' 
 
 // Utils
 export async function checkAIAvailability() {
-  const envVarExists = !!process.env.GROQ_API_KEY || !!process.env.OPENAI_API_KEY;
+  const envVarExists = !!process.env.GROQ_API_KEY || !!process.env.OPENAI_API_KEY || !!process.env.AZURE_OPENAI_API_KEY || !!process.env.AZURE_OPENAI_ENDPOINT;
   return envVarExists;
 }
 
