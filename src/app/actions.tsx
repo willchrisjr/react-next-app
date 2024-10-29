@@ -86,7 +86,7 @@ export async function continueConversation(history: Message[], provider: 'groq' 
 
 // Utils
 export async function checkAIAvailability() {
-  const envVarExists = !!process.env.GROQ_API_KEY;
+  const envVarExists = !!process.env.GROQ_API_KEY || !!process.env.OPENAI_API_KEY;
   return envVarExists;
 }
 
